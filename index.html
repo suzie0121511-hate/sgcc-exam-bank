@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>国家电网备考刷题宝</title>
+    <title>国家电网备考刷题宝 v2.0</title>
     <style>
         :root {
             --primary: #00796b;
@@ -14,89 +14,113 @@
             --error-light: #ffebee;
             --text: #333;
             --bg: #f5f7f8;
+            --gray: #666;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); padding: 15px; line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 80vh; display: flex; flex-direction: column; }
-        h2 { font-size: 1.3rem; margin-bottom: 15px; color: #111; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); padding: 12px; line-height: 1.5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 18px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 85vh; display: flex; flex-direction: column; }
         
-        /* 科目选择导航 */
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab-btn { background: #eee; border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; white-space: nowrap; color: #666; transition: all 0.2s; }
-        .tab-btn.active { background: var(--primary); color: white; font-weight: bold; }
+        /* 科目及进度面板 */
+        .subject-panel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+        .subject-row { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 10px 14px; border-radius: 10px; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; }
+        .subject-row:active { background: #eee; }
+        .subject-row.active { border-color: var(--primary); background: var(--primary-light); }
+        .sub-name { font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+        .sub-meta { display: flex; flex-direction: column; align-items: flex-end; width: 45%; }
+        .sub-progress-text { font-size: 0.75rem; color: var(--gray); margin-bottom: 4px; }
+        .sub-progress-bg { width: 100%; background: #e0e0e0; height: 5px; border-radius: 3px; overflow: hidden; }
+        .sub-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        
+        /* 错题本特殊样式 */
+        .subject-row.wrong-book.active { background: #ffebee; border-color: var(--error); }
+        .subject-row.wrong-book .sub-progress-fill { background: var(--error); }
 
-        /* 进度条 */
-        .progress-container { margin-bottom: 20px; background: #eee; height: 6px; border-radius: 3px; overflow: hidden; }
-        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s; }
+        /* 单轮测验进度条 */
+        .session-progress { margin-bottom: 15px; background: #eee; height: 4px; border-radius: 2px; overflow: hidden; display: none; }
+        .session-bar { background: #009688; height: 100%; width: 0%; transition: width 0.2s; }
 
         /* 题目展示区 */
         .quiz-box { flex-grow: 1; display: none; }
-        .quiz-box.active { display: block; }
-        .question-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; word-break: break-all; }
-        .tag { display: inline-block; background: var(--primary-light); color: var(--primary); font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; }
+        .question-text { font-size: 1.05rem; font-weight: 600; margin-bottom: 15px; word-break: break-all; }
+        .tag { display: inline-block; background: #fff; border: 1px solid var(--primary); color: var(--primary); font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; }
 
-        /* 选项样式 */
-        .options-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .option-item { border: 2px solid #e0e0e0; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: all 0.2s; background: #fff; }
-        .option-item:active { background: #f0f0f0; }
+        /* 选项 */
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .option-item { border: 1px solid #e0e0e0; padding: 12px 14px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; transition: all 0.15s; background: #fff; }
         .option-item.correct { border-color: var(--success); background-color: var(--success-light); color: var(--success); font-weight: bold; }
         .option-item.wrong { border-color: var(--error); background-color: var(--error-light); color: var(--error); }
 
-        /* 解析区域 */
-        .analysis-box { display: none; background: #f9f9f9; border-left: 4px solid var(--primary); padding: 15px; border-radius: 0 8px 8px 0; margin-top: 15px; animation: fadeIn 0.3s ease; }
-        .analysis-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; font-size: 0.95rem; }
-        .analysis-text { font-size: 0.9rem; color: #555; }
+        /* 解析 */
+        .analysis-box { display: none; background: #f9f9f9; border-left: 4px solid var(--primary); padding: 12px; border-radius: 0 8px 8px 0; margin-top: 12px; }
+        .analysis-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; font-size: 0.9rem; }
+        .analysis-text { font-size: 0.85rem; color: #555; }
 
-        /* 控制按钮 */
-        .action-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+        /* 按钮 */
+        .action-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 15px; display: none; }
         
-        /* 结果结算页 */
-        .result-box { display: none; text-align: center; padding: 40px 10px; }
-        .result-score { font-size: 3rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* 结算页 */
+        .result-box { display: none; text-align: center; padding: 30px 10px; }
+        .result-score { font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 15px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 顶部科目选择 -->
-    <div class="nav-tabs" id="navTabs">
-        <button class="tab-btn active" onclick="switchSubject('all')">综合大练兵</button>
-        <button class="tab-btn" onclick="switchSubject('电力系统分析')">电力系统分析</button>
-        <button class="tab-btn" onclick="switchSubject('继电保护')">继电保护</button>
-    </div>
-
-    <!-- 顶部进度条 -->
-    <div class="progress-container" id="progContainer">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
-
-    <!-- 刷题主界面 -->
-    <div class="quiz-box" id="quizBox">
-        <div id="questionContainer">
-            <span class="tag" id="subjectTag">科目</span>
-            <div class="question-text" id="qText">题目加载中...</div>
-            <div class="options-list" id="optionsList"></div>
+    <div class="subject-panel" id="subjectPanel">
+        <div class="subject-row" id="row-all" onclick="selectSubject('all')">
+            <div class="sub-name">🎯 综合大练兵</div>
+            <div class="sub-meta">
+                <span class="sub-progress-text" id="txt-all">0/0 (0%)</span>
+                <div class="sub-progress-bg"><div class="sub-progress-fill" id="bar-all"></div></div>
+            </div>
         </div>
+        <div class="subject-row" id="row-电力系统分析" onclick="selectSubject('电力系统分析')">
+            <div class="sub-name">⚡ 电力系统分析</div>
+            <div class="sub-meta">
+                <span class="sub-progress-text" id="txt-电力系统分析">0/0 (0%)</span>
+                <div class="sub-progress-bg"><div class="sub-progress-fill" id="bar-电力系统分析"></div></div>
+            </div>
+        </div>
+        <div class="subject-row" id="row-继电保护" onclick="selectSubject('继电保护')">
+            <div class="sub-name">🛡️ 继电保护</div>
+            <div class="sub-meta">
+                <span class="sub-progress-text" id="txt-继电保护">0/0 (0%)</span>
+                <div class="sub-progress-bg"><div class="sub-progress-fill" id="bar-继电保护"></div></div>
+            </div>
+        </div>
+        <div class="subject-row wrong-book" id="row-wrong" onclick="selectSubject('wrong')">
+            <div class="sub-name">❌ 错题重做本</div>
+            <div class="sub-meta">
+                <span class="sub-progress-text" id="txt-wrong">剩余 0 题</span>
+                <div class="sub-progress-bg"><div class="sub-progress-fill" id="bar-wrong" style="width:0%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="session-progress" id="sessionProg"><div class="session-bar" id="sessionBar"></div></div>
+
+    <div class="quiz-box" id="quizBox">
+        <span class="tag" id="subjectTag">科目</span>
+        <div class="question-text" id="qText">题目加载中...</div>
+        <div class="options-list" id="optionsList"></div>
+        
         <div class="analysis-box" id="analysisBox">
-            <div class="analysis-title" id="anaTitle">正确答案：A</div>
-            <div class="analysis-text" id="anaText">解析内容</div>
+            <div class="analysis-title" id="anaTitle">正确答案</div>
+            <div class="analysis-text" id="anaText">解析</div>
         </div>
         <button class="action-btn" id="nextBtn" onclick="nextQuestion()">下一题</button>
     </div>
 
-    <!-- 结果结算界面 -->
     <div class="result-box" id="resultBox">
-        <h2>🎉 本轮10题小测验结束！</h2>
+        <h2 id="resultTitle">🎉 测试完成！</h2>
         <div class="result-score" id="resultScore">0 / 10</div>
-        <p style="color: #666; margin-bottom: 30px;">做过的题目已被标记，下一轮抽题将尽量不再重复出现。</p>
-        <button class="action-btn" style="display:block;" onclick="startNewSession()">再来 10 题</button>
+        <p id="resultTip" style="color: var(--gray); font-size: 0.85rem; margin-bottom: 20px;">做错的题已自动加入错题本。</p>
+        <button class="action-btn" style="display:block;" onclick="startSession()">再来一组</button>
     </div>
 </div>
 
 <script>
-// --- ⚙️ 体验版内置核心题库数据 ---
+// --- ⚙️ 全局题库数据 ---
 const rawQuestions = [
     {
         "id": "ps_001",
@@ -112,7 +136,15 @@ const rawQuestions = [
         "question": "在电力系统潮流计算中，一般选定哪个节点作为平衡节点（Slack Bus）？",
         "options": {"A": "容量最大的发电厂节点", "B": "负荷最大的节点", "C": "系统枢纽变电所节点", "D": "任意选定节点"},
         "answer": "A",
-        "analysis": "平衡节点通常选择系统内容量最大、调频能力最强的发电厂节点。它的作用是平衡全网的有功和无功功率，同时作为全网电压的参考相角（通常设为0°）。"
+        "analysis": "平衡节点通常选择系统内容量最大、调频能力最强的发电厂节点。它的作用是平衡全网的有功和无功功率，同时作为全网电压的参考相角。"
+    },
+    {
+        "id": "ps_003",
+        "subject": "电力系统分析",
+        "question": "电力系统的频率主要取决于全网的（ ）平衡。",
+        "options": {"A": "无功功率", "B": "有功功率", "C": "视在功率", "D": "电压幅值"},
+        "answer": "B",
+        "analysis": "频率是全网统一的指标，与有功功率密切相关（有功-频率控制）。而电压则属于局部指标，与无功功率密切相关（无功-电压控制）。"
     },
     {
         "id": "rp_001",
@@ -128,15 +160,7 @@ const rawQuestions = [
         "question": "继电保护装置灵敏性（灵敏系数）的计算，通常应该采用哪种短路类型进行校验？",
         "options": {"A": "三相短路", "B": "单相接地短路", "C": "最不利情况下的运行方式和短路类型", "D": "两相短路"},
         "answer": "C",
-        "analysis": "规程规定，校验保护装置的灵敏系数时，应根据可能发生的最不利运行方式、故障类型和故障点进行计算。对于要求最小短路电流的保护，通常采用两相短路或运行方式最小的三相短路。"
-    },
-    {
-        "id": "ps_003",
-        "subject": "电力系统分析",
-        "question": "电力系统的频率主要取决于全网的（ ）平衡。",
-        "options": {"A": "无功功率", "B": "有功功率", "C": "视在功率", "D": "电压幅值"},
-        "answer": "B",
-        "analysis": "频率是全网统一的指标，与有功功率密切相关（有功-频率控制）。而电压则属于局部指标，与无功功率密切相关（无功-电压控制）。"
+        "analysis": "规程规定，校验保护装置的灵敏系数时，应根据可能发生的最不利运行方式、故障类型和故障点进行计算。对于要求最小短路电流的保护，通常采用两相短路。"
     },
     {
         "id": "rp_003",
@@ -144,74 +168,114 @@ const rawQuestions = [
         "question": "输线路纵联保护（如方向纵联、高频保护）的核心作用是实现（ ）。",
         "options": {"A": "延时切除全线故障", "B": "瞬时切除本线路范围内的任何故障", "C": "作为下一段线路的后备保护", "D": "仅仅保护线路对侧母线"},
         "answer": "B",
-        "analysis": "传统的阶段式电流电压保护无法做到全线速动。纵联保护通过通道传输两侧信息，能够判别是区内故障还是区外故障，从而实现全线范围内发生故障时无延时（瞬时）切除。"
+        "analysis": "传统的阶段式保护无法做到全线速动。纵联保护通过通道传输两侧信息，能够判别是区内故障还是区外故障，从而实现全线范围内无延时切除。"
     }
 ];
 
-// --- 🧠 核心刷题逻辑控制 ---
-let currentSubject = 'all'; // 当前选择的科目
-let pool = [];              // 当前符合科目的总题池
-let currentSessionQuestions = []; // 当前一轮(10题)的题目
-let currentIndex = 0;       // 当前做到了第几题
-let score = 0;              // 答对题数
-let hasAnswered = false;    // 当前题是否已点击过答案
+// --- 💾 核心状态控制（localStorage持久化） ---
+let currentSubject = 'all'; 
+let pool = [];              
+let currentSessionQuestions = []; 
+let currentIndex = 0;       
+let score = 0;              
+let hasAnswered = false;    
+let wrongInSession = 0; // 本轮测验做错了多少题
 
-// 记录已做过的题目ID，实现多轮刷题智能“去重”
-let answeredGlobalIds = JSON.parse(localStorage.getItem('answeredGlobalIds')) || [];
+// 从本地存储读取历史记录
+let answeredGlobalIds = JSON.parse(localStorage.getItem('sgcc_answered_ids')) || [];
+let wrongGlobalIds = JSON.parse(localStorage.getItem('sgcc_wrong_ids')) || [];
 
-function initQuiz() {
-    // 1. 根据科目筛选题目
-    if (currentSubject === 'all') {
+// 初始化：计算并刷新各板块的总进度条
+function refreshOverallProgress() {
+    const subjects = ['all', '电力系统分析', '继电保护'];
+    
+    subjects.forEach(sub => {
+        let subTasks = (sub === 'all') ? rawQuestions : rawQuestions.filter(q => q.subject === sub);
+        let total = subTasks.length;
+        let done = subTasks.filter(q => answeredGlobalIds.includes(q.id)).length;
+        let percent = total > 0 ? Math.round((done / total) * 100) : 0;
+        
+        document.getElementById(`txt-${sub}`).innerText = `${done} / ${total} (${percent}%)`;
+        document.getElementById(`bar-${sub}`).style.width = `${percent}%`;
+    });
+
+    // 错题本进度渲染
+    let wrongCount = wrongGlobalIds.length;
+    document.getElementById('txt-wrong').innerText = `剩余 ${wrongCount} 题`;
+    document.getElementById('bar-wrong').style.width = wrongCount > 0 ? '100%' : '0%';
+    if(wrongCount > 0) {
+        document.getElementById('bar-wrong').style.backgroundColor = 'var(--error)';
+    }
+}
+
+// 选择科目分类
+function selectSubject(sub) {
+    currentSubject = sub;
+    document.querySelectorAll('.subject-row').forEach(row => row.classList.remove('active'));
+    document.getElementById(`row-${sub}`).classList.add('active');
+    
+    startSession();
+}
+
+// 开始一组新测验（10题）
+function startSession() {
+    document.getElementById('resultBox').style.display = 'none';
+    wrongInSession = 0;
+
+    // 1. 提取目标题池
+    if (currentSubject === 'wrong') {
+        // 如果是错题本模式
+        pool = rawQuestions.filter(q => wrongGlobalIds.includes(q.id));
+        if (pool.length === 0) {
+            alert("🎯 你的错题本空空如也，太棒了！快去刷其他科目吧。");
+            selectSubject('all');
+            return;
+        }
+    } else if (currentSubject === 'all') {
         pool = [...rawQuestions];
     } else {
         pool = rawQuestions.filter(q => q.subject === currentSubject);
     }
 
-    // 2. 核心去重和随机抽题机制
-    // 优先选没做过的题
-    let unspent = pool.filter(q => !answeredGlobalIds.includes(q.id));
-    
-    // 如果没做过的题不够一轮(比如小于10题)，就把这个科目的历史记录重置，重新循环
-    if (unspent.length === 0 || (pool.length >= 10 && unspent.length < 10)) {
-        // 清空该科目在历史记录中的标记，以便循环刷题
-        answeredGlobalIds = answeredGlobalIds.filter(id => !pool.map(q => q.id).includes(id));
-        localStorage.setItem('answeredGlobalIds', JSON.stringify(answeredGlobalIds));
-        unspent = [...pool];
+    // 2. 去重抽题逻辑 (错题本模式不执行去重，直到做对为止)
+    let candidateQuestions = [...pool];
+    if (currentSubject !== 'wrong') {
+        let unspent = pool.filter(q => !answeredGlobalIds.includes(q.id));
+        // 如果该科目没做过的题刷完了，自动重置该科目的历史标记，实现循环刷题
+        if (unspent.length === 0) {
+            answeredGlobalIds = answeredGlobalIds.filter(id => !pool.map(q => q.id).includes(id));
+            localStorage.setItem('sgcc_answered_ids', JSON.stringify(answeredGlobalIds));
+            unspent = [...pool];
+        }
+        candidateQuestions = unspent;
     }
 
-    // 洗牌算法随机打乱没做过的题
-    unspent.sort(() => Math.random() - 0.5);
-    
-    // 每次测验上限10道题，如果题库太少则有多少出多少
-    let targetCount = Math.min(10, unspent.length);
-    currentSessionQuestions = unspent.slice(0, targetCount);
+    // 3. 随机洗牌并截取最多10道题
+    candidateQuestions.sort(() => Math.random() - 0.5);
+    let targetCount = Math.min(10, candidateQuestions.length);
+    currentSessionQuestions = candidateQuestions.slice(0, targetCount);
 
     currentIndex = 0;
     score = 0;
 
-    if (currentSessionQuestions.length === 0) {
-        alert("该科目下暂无题目，请先切换其他科目！");
-        return;
-    }
-
-    document.getElementById('resultBox').style.display = 'none';
     document.getElementById('quizBox').style.display = 'block';
-    document.getElementById('progContainer').style.display = 'block';
+    document.getElementById('sessionProg').style.display = 'block';
     
     showQuestion();
 }
 
+// 显示单道题
 function showQuestion() {
     hasAnswered = false;
     document.getElementById('nextBtn').style.display = 'none';
     document.getElementById('analysisBox').style.display = 'none';
 
-    // 更新进度条
+    // 更新测验微型进度条
     let progress = (currentIndex / currentSessionQuestions.length) * 100;
-    document.getElementById('progressBar').style.width = `${progress}%`;
+    document.getElementById('sessionBar').style.width = `${progress}%`;
 
     let q = currentSessionQuestions[currentIndex];
-    document.getElementById('subjectTag').innerText = q.subject;
+    document.getElementById('subjectTag').innerText = currentSubject === 'wrong' ? `错题重做 • ${q.subject}` : q.subject;
     document.getElementById('qText').innerText = `Q${currentIndex + 1}. ${q.question}`;
 
     // 渲染选项
@@ -227,26 +291,40 @@ function showQuestion() {
     }
 }
 
+// 判定答案
 function checkAnswer(selectedKey, optElement) {
-    if (hasAnswered) return; // 防止重复点击
+    if (hasAnswered) return;
     hasAnswered = true;
 
     let q = currentSessionQuestions[currentIndex];
     let items = document.querySelectorAll('.option-item');
 
-    // 标记全局已做
-    if (!answeredGlobalIds.includes(q.id)) {
+    // 如果不是错题本模式，记录为全局已做
+    if (currentSubject !== 'wrong' && !answeredGlobalIds.includes(q.id)) {
         answeredGlobalIds.push(q.id);
-        localStorage.setItem('answeredGlobalIds', JSON.stringify(answeredGlobalIds));
+        localStorage.setItem('sgcc_answered_ids', JSON.stringify(answeredGlobalIds));
     }
 
-    // 判定对错
     if (selectedKey === q.answer) {
         optElement.classList.add('correct');
         score++;
+        
+        // 如果是在【错题本】模式下做对了，将其从错题本中移除
+        if (currentSubject === 'wrong') {
+            wrongGlobalIds = wrongGlobalIds.filter(id => id !== q.id);
+            localStorage.setItem('sgcc_wrong_ids', JSON.stringify(wrongGlobalIds));
+        }
     } else {
         optElement.classList.add('wrong');
-        // 顺便把正确答案也亮绿，方便对比
+        wrongInSession++;
+        
+        // 做错题目自动加入全局错题本（如果原本不在里面）
+        if (!wrongGlobalIds.includes(q.id)) {
+            wrongGlobalIds.push(q.id);
+            localStorage.setItem('sgcc_wrong_ids', JSON.stringify(wrongGlobalIds));
+        }
+
+        // 高亮正确答案
         items.forEach(item => {
             if (item.innerText.startsWith(q.answer + '.')) {
                 item.classList.add('correct');
@@ -254,46 +332,46 @@ function checkAnswer(selectedKey, optElement) {
         });
     }
 
-    // 展示自带解析
+    // 展现解析
     document.getElementById('anaTitle').innerText = `正确答案：${q.answer}`;
     document.getElementById('anaText').innerText = q.analysis;
     document.getElementById('analysisBox').style.display = 'block';
     
-    // 显示下一题按钮
-    document.getElementById('nextBtn').innerText = (currentIndex === currentSessionQuestions.length - 1) ? "查看本次测验结果" : "下一题";
+    document.getElementById('nextBtn').innerText = (currentIndex === currentSessionQuestions.length - 1) ? "查看测验结果" : "下一题";
     document.getElementById('nextBtn').style.display = 'block';
+    
+    // 实时更新主面板的进度数字
+    refreshOverallProgress();
 }
 
+// 下一题或进入结算
 function nextQuestion() {
     currentIndex++;
     if (currentIndex < currentSessionQuestions.length) {
         showQuestion();
     } else {
-        // 进入结算页
-        document.getElementById('progressBar').style.width = `100%`;
+        document.getElementById('sessionBar').style.width = `100%`;
         document.getElementById('quizBox').style.display = 'none';
-        document.getElementById('progContainer').style.display = 'none';
+        document.getElementById('sessionProg').style.display = 'none';
         document.getElementById('resultBox').style.display = 'block';
+        
         document.getElementById('resultScore').innerText = `${score} / ${currentSessionQuestions.length}`;
+        
+        if (currentSubject === 'wrong') {
+            document.getElementById('resultTitle').innerText = "💪 错题消灭战结束！";
+            document.getElementById('resultTip').innerText = `本轮成功消灭了 ${score} 道错题！剩下做错的题会继续保留在错题本中。`;
+        } else {
+            document.getElementById('resultTitle').innerText = "🎉 本轮10题小测验结束！";
+            document.getElementById('resultTip').innerText = `本轮做对 ${score} 题，新增 ${wrongInSession} 道错题已同步存入错题本。`;
+        }
     }
 }
 
-function startNewSession() {
-    initQuiz();
-}
-
-function switchSubject(sub) {
-    currentSubject = sub;
-    // 切换高亮样式
-    let btns = document.querySelectorAll('.tab-btn');
-    btns.forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    initQuiz();
-}
-
-// 首次进入自动初始化
-window.onload = initQuiz;
+// 页面首次加载
+window.onload = function() {
+    refreshOverallProgress();
+    selectSubject('all'); // 默认进入综合练兵
+};
 </script>
 </body>
 </html>
