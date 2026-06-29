@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>国家电网备考刷题宝 v2.0</title>
+    <title>国家电网备考刷题宝 v2.0-Full</title>
     <style>
         :root {
             --primary: #00796b;
@@ -20,7 +20,6 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); padding: 12px; line-height: 1.5; }
         .container { max-width: 600px; margin: 0 auto; background: white; padding: 18px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 85vh; display: flex; flex-direction: column; }
         
-        /* 科目及进度面板 */
         .subject-panel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
         .subject-row { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 10px 14px; border-radius: 10px; border: 1px solid #eaeaea; cursor: pointer; transition: all 0.2s; }
         .subject-row:active { background: #eee; }
@@ -31,34 +30,27 @@
         .sub-progress-bg { width: 100%; background: #e0e0e0; height: 5px; border-radius: 3px; overflow: hidden; }
         .sub-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
         
-        /* 错题本特殊样式 */
         .subject-row.wrong-book.active { background: #ffebee; border-color: var(--error); }
         .subject-row.wrong-book .sub-progress-fill { background: var(--error); }
 
-        /* 单轮测验进度条 */
         .session-progress { margin-bottom: 15px; background: #eee; height: 4px; border-radius: 2px; overflow: hidden; display: none; }
         .session-bar { background: #009688; height: 100%; width: 0%; transition: width 0.2s; }
 
-        /* 题目展示区 */
         .quiz-box { flex-grow: 1; display: none; }
         .question-text { font-size: 1.05rem; font-weight: 600; margin-bottom: 15px; word-break: break-all; }
         .tag { display: inline-block; background: #fff; border: 1px solid var(--primary); color: var(--primary); font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; }
 
-        /* 选项 */
         .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         .option-item { border: 1px solid #e0e0e0; padding: 12px 14px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; transition: all 0.15s; background: #fff; }
         .option-item.correct { border-color: var(--success); background-color: var(--success-light); color: var(--success); font-weight: bold; }
         .option-item.wrong { border-color: var(--error); background-color: var(--error-light); color: var(--error); }
 
-        /* 解析 */
         .analysis-box { display: none; background: #f9f9f9; border-left: 4px solid var(--primary); padding: 12px; border-radius: 0 8px 8px 0; margin-top: 12px; }
         .analysis-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; font-size: 0.9rem; }
         .analysis-text { font-size: 0.85rem; color: #555; }
 
-        /* 按钮 */
         .action-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 15px; display: none; }
         
-        /* 结算页 */
         .result-box { display: none; text-align: center; padding: 30px 10px; }
         .result-score { font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 15px 0; }
     </style>
@@ -86,6 +78,13 @@
             <div class="sub-meta">
                 <span class="sub-progress-text" id="txt-继电保护">0/0 (0%)</span>
                 <div class="sub-progress-bg"><div class="sub-progress-fill" id="bar-继电保护"></div></div>
+            </div>
+        </div>
+        <div class="subject-row" id="row-高电压技术" onclick="selectSubject('高电压技术')">
+            <div class="sub-name">💥 高电压技术</div>
+            <div class="sub-meta">
+                <span class="sub-progress-text" id="txt-高电压技术">0/0 (0%)</span>
+                <div class="sub-progress-bg"><div class="sub-progress-fill" id="bar-高电压技术"></div></div>
             </div>
         </div>
         <div class="subject-row wrong-book" id="row-wrong" onclick="selectSubject('wrong')">
@@ -120,7 +119,7 @@
 </div>
 
 <script>
-// --- ⚙️ 全局题库数据 ---
+// --- ⚙️ 全量精选真题及常考习题数据库 ---
 const rawQuestions = [
     {
         "id": "ps_001",
@@ -136,7 +135,7 @@ const rawQuestions = [
         "question": "在电力系统潮流计算中，一般选定哪个节点作为平衡节点（Slack Bus）？",
         "options": {"A": "容量最大的发电厂节点", "B": "负荷最大的节点", "C": "系统枢纽变电所节点", "D": "任意选定节点"},
         "answer": "A",
-        "analysis": "平衡节点通常选择系统内容量最大、调频能力最强的发电厂节点。它的作用是平衡全网的有功和无功功率，同时作为全网电压的参考相角。"
+        "analysis": "平衡节点通常选择系统内容量最大、调频能力最强的发电厂节点。它的作用是平衡全网的有功和无功功率，同时作为全网电压的参考相角（通常设为0°）。"
     },
     {
         "id": "ps_003",
@@ -145,6 +144,22 @@ const rawQuestions = [
         "options": {"A": "无功功率", "B": "有功功率", "C": "视在功率", "D": "电压幅值"},
         "answer": "B",
         "analysis": "频率是全网统一的指标，与有功功率密切相关（有功-频率控制）。而电压则属于局部指标，与无功功率密切相关（无功-电压控制）。"
+    },
+    {
+        "id": "ps_004",
+        "subject": "电力系统分析",
+        "question": "复杂电力系统潮流计算中，牛顿-拉夫逊法与高斯-赛德尔法相比，主要优点是（ ）。",
+        "options": {"A": "占用内存小", "B": "对初值要求低", "C": "收敛速度快，迭代次数少", "D": "计算公式简单"},
+        "answer": "C",
+        "analysis": "牛顿-拉夫逊法具有平方收敛特性，其主要优点是收敛速度快，迭代次数通常与系统规模大小基本无关。缺点是对初值要求较高。"
+    },
+    {
+        "id": "ps_005",
+        "subject": "电力系统分析",
+        "question": "减少输电线路有功功率损耗的主要措施是（ ）。",
+        "options": {"A": "提高输电电压等级", "B": "提高无功功率损耗", "C": "增加线路的电抗", "D": "减小输电电流的相角"},
+        "answer": "A",
+        "analysis": "根据有功损耗公式 ΔP = (P²+Q²)/U² * R，在输送有功和无功不变的情况下，提高输电电压等级 U，能显著减小输电电流，从而成平方倍地降低电网有功损耗。"
     },
     {
         "id": "rp_001",
@@ -160,7 +175,7 @@ const rawQuestions = [
         "question": "继电保护装置灵敏性（灵敏系数）的计算，通常应该采用哪种短路类型进行校验？",
         "options": {"A": "三相短路", "B": "单相接地短路", "C": "最不利情况下的运行方式和短路类型", "D": "两相短路"},
         "answer": "C",
-        "analysis": "规程规定，校验保护装置的灵敏系数时，应根据可能发生的最不利运行方式、故障类型和故障点进行计算。对于要求最小短路电流的保护，通常采用两相短路。"
+        "analysis": "规程规定，校验保护装置的灵敏系数时，应根据可能发生的最不利运行方式、故障类型和故障点进行计算。对于要求最小短路电流的保护，通常采用两相短路或运行方式最小的三相短路。"
     },
     {
         "id": "rp_003",
@@ -168,26 +183,79 @@ const rawQuestions = [
         "question": "输线路纵联保护（如方向纵联、高频保护）的核心作用是实现（ ）。",
         "options": {"A": "延时切除全线故障", "B": "瞬时切除本线路范围内的任何故障", "C": "作为下一段线路的后备保护", "D": "仅仅保护线路对侧母线"},
         "answer": "B",
-        "analysis": "传统的阶段式保护无法做到全线速动。纵联保护通过通道传输两侧信息，能够判别是区内故障还是区外故障，从而实现全线范围内无延时切除。"
+        "analysis": "传统的阶段式电流电压保护无法做到全线速动。纵联保护通过通道传输两侧信息，能够判别是区内故障还是区外故障，从而实现全线范围内无延时（瞬时）切除。"
+    },
+    {
+        "id": "rp_004",
+        "subject": "继电保护",
+        "question": "瓦斯保护是变压器的主要保护，它能够反应变压器（ ）的故障。",
+        "options": {"A": "油箱内部", "B": "套管引出线", "C": "分接开关外部", "D": "绝缘子表面放电"},
+        "answer": "A",
+        "analysis": "瓦斯保护是利用油箱内故障时油分解产生气体这一特点实现的，因此它只能反应变压器油箱内部的各种故障（如短路、断线、铁芯过热、绝缘劣化等），对外部故障（套管或引出线）无法反应。"
+    },
+    {
+        "id": "rp_005",
+        "subject": "继电保护",
+        "question": "在双侧电源网络中，当线路发生短路故障时，为了实现保护的选择性，必须在电流保护中加装（ ）。",
+        "options": {"A": "时间继电器", "B": "方向元件", "C": "电压闭锁元件", "D": "差动分量"},
+        "answer": "B",
+        "analysis": "双侧电源网络中，短路功率可能从两个方向流向故障点。普通的阶段式电流保护无法区分方向，会导致非故障线路误动。因此必须加装功率方向元件（方向闭锁），只有当功率方向由母线流向线路时才允许保护动作。"
+    },
+    {
+        "id": "hv_001",
+        "subject": "高电压技术",
+        "question": "极不均匀电场中，流注理论主要适用于解释（ ）下的气体放电过程。",
+        "options": {"A": "长间隙、高气压", "B": "短间隙、低气压", "C": "均匀电场", "D": "极短间隙常压"},
+        "answer": "A",
+        "analysis": "汤逊理论主要适用于低气压、短间隙的气体放电；而流注理论则考虑了空间电荷畸变电场以及光电离的作用，能够很好地解释长间隙、高气压（如大气压）下的气体放电现象。"
+    },
+    {
+        "id": "hv_002",
+        "subject": "高电压技术",
+        "question": "在极不均匀电场中，由于““极性效应””，正棒-负板间隙的击穿电压要比负棒-正板间隙的击穿电压（ ）。",
+        "options": {"A": "高得多", "B": "低得多", "C": "完全相同", "D": "稍微高一点"},
+        "answer": "B",
+        "analysis": "这是高压技术中经典的极性效应。正棒时，棒极附近形成的正空间电荷会削弱棒极表面、但加强了指向板极的电场，使流注更容易向板极发展，因此击穿电压比负棒低得多。"
+    },
+    {
+        "id": "hv_003",
+        "subject": "高电压技术",
+        "question": "避雷针（线）在保护电力设备时，其主要作用是（ ）。",
+        "options": {"A": "将雷电流限制在很小的数值", "B": "切断雷电流的通道", "C": "吸引雷电投向自身并安全导入大地", "D": "吸收雷电的电磁脉冲"},
+        "answer": "C",
+        "analysis": "避雷针（线）的实质是“引雷针”，它利用自身高出被保护物的优势，将雷电吸引到自己身上，并通过良好的接地装置将强大的雷电流安全导入大地，从而使附近的设备免受直击雷破坏。"
+    },
+    {
+        "id": "hv_004",
+        "subject": "高电压技术",
+        "question": "我国 110kV 及以上的高压大型变压器，其中性点通常采用（ ）接地方式。",
+        "options": {"A": "不接地", "B": "经消弧线圈", "C": "直接接地（大接地电流系统）", "D": "经高电阻"},
+        "answer": "C",
+        "analysis": "我国 110kV 及以上的高压、超高压系统属于大接地电流系统，其中性点通常采取直接接地。主要目的是限制分相分级绝缘变压器的中性点过电压，降低全线设备的绝缘水平和造价。"
+    },
+    {
+        "id": "hv_005",
+        "subject": "高电压技术",
+        "question": "冲击电压试验中，我国国家标准规定的标准雷电冲击电压波形为（ ）μs。",
+        "options": {"A": "1.2 / 50", "B": "250 / 2500", "C": "1.2 / 2500", "D": "50 / 100"},
+        "answer": "A",
+        "analysis": "标准雷电冲击电压波形用 T1/T2 表示，其中波头时间 T1 = 1.2μs（允许±30%误差），波尾时间（半峰值时间） T2 = 50μs（允许±20%误差）。注：250/2500μs 为标准操作冲击电压波形。"
     }
 ];
 
-// --- 💾 核心状态控制（localStorage持久化） ---
 let currentSubject = 'all'; 
 let pool = [];              
 let currentSessionQuestions = []; 
 let currentIndex = 0;       
 let score = 0;              
 let hasAnswered = false;    
-let wrongInSession = 0; // 本轮测验做错了多少题
+let wrongInSession = 0; 
 
-// 从本地存储读取历史记录
 let answeredGlobalIds = JSON.parse(localStorage.getItem('sgcc_answered_ids')) || [];
 let wrongGlobalIds = JSON.parse(localStorage.getItem('sgcc_wrong_ids')) || [];
 
-// 初始化：计算并刷新各板块的总进度条
 function refreshOverallProgress() {
-    const subjects = ['all', '电力系统分析', '继电保护'];
+    const subjects = ['all', '电力系统分析', '继电保护', '高电压技术'];
     
     subjects.forEach(sub => {
         let subTasks = (sub === 'all') ? rawQuestions : rawQuestions.filter(q => q.subject === sub);
@@ -199,7 +267,6 @@ function refreshOverallProgress() {
         document.getElementById(`bar-${sub}`).style.width = `${percent}%`;
     });
 
-    // 错题本进度渲染
     let wrongCount = wrongGlobalIds.length;
     document.getElementById('txt-wrong').innerText = `剩余 ${wrongCount} 题`;
     document.getElementById('bar-wrong').style.width = wrongCount > 0 ? '100%' : '0%';
@@ -208,7 +275,6 @@ function refreshOverallProgress() {
     }
 }
 
-// 选择科目分类
 function selectSubject(sub) {
     currentSubject = sub;
     document.querySelectorAll('.subject-row').forEach(row => row.classList.remove('active'));
@@ -217,14 +283,11 @@ function selectSubject(sub) {
     startSession();
 }
 
-// 开始一组新测验（10题）
 function startSession() {
     document.getElementById('resultBox').style.display = 'none';
     wrongInSession = 0;
 
-    // 1. 提取目标题池
     if (currentSubject === 'wrong') {
-        // 如果是错题本模式
         pool = rawQuestions.filter(q => wrongGlobalIds.includes(q.id));
         if (pool.length === 0) {
             alert("🎯 你的错题本空空如也，太棒了！快去刷其他科目吧。");
@@ -237,11 +300,9 @@ function startSession() {
         pool = rawQuestions.filter(q => q.subject === currentSubject);
     }
 
-    // 2. 去重抽题逻辑 (错题本模式不执行去重，直到做对为止)
     let candidateQuestions = [...pool];
     if (currentSubject !== 'wrong') {
         let unspent = pool.filter(q => !answeredGlobalIds.includes(q.id));
-        // 如果该科目没做过的题刷完了，自动重置该科目的历史标记，实现循环刷题
         if (unspent.length === 0) {
             answeredGlobalIds = answeredGlobalIds.filter(id => !pool.map(q => q.id).includes(id));
             localStorage.setItem('sgcc_answered_ids', JSON.stringify(answeredGlobalIds));
@@ -250,7 +311,6 @@ function startSession() {
         candidateQuestions = unspent;
     }
 
-    // 3. 随机洗牌并截取最多10道题
     candidateQuestions.sort(() => Math.random() - 0.5);
     let targetCount = Math.min(10, candidateQuestions.length);
     currentSessionQuestions = candidateQuestions.slice(0, targetCount);
@@ -264,13 +324,11 @@ function startSession() {
     showQuestion();
 }
 
-// 显示单道题
 function showQuestion() {
     hasAnswered = false;
     document.getElementById('nextBtn').style.display = 'none';
     document.getElementById('analysisBox').style.display = 'none';
 
-    // 更新测验微型进度条
     let progress = (currentIndex / currentSessionQuestions.length) * 100;
     document.getElementById('sessionBar').style.width = `${progress}%`;
 
@@ -278,7 +336,6 @@ function showQuestion() {
     document.getElementById('subjectTag').innerText = currentSubject === 'wrong' ? `错题重做 • ${q.subject}` : q.subject;
     document.getElementById('qText').innerText = `Q${currentIndex + 1}. ${q.question}`;
 
-    // 渲染选项
     let optsList = document.getElementById('optionsList');
     optsList.innerHTML = '';
     
@@ -291,7 +348,6 @@ function showQuestion() {
     }
 }
 
-// 判定答案
 function checkAnswer(selectedKey, optElement) {
     if (hasAnswered) return;
     hasAnswered = true;
@@ -299,7 +355,6 @@ function checkAnswer(selectedKey, optElement) {
     let q = currentSessionQuestions[currentIndex];
     let items = document.querySelectorAll('.option-item');
 
-    // 如果不是错题本模式，记录为全局已做
     if (currentSubject !== 'wrong' && !answeredGlobalIds.includes(q.id)) {
         answeredGlobalIds.push(q.id);
         localStorage.setItem('sgcc_answered_ids', JSON.stringify(answeredGlobalIds));
@@ -309,7 +364,6 @@ function checkAnswer(selectedKey, optElement) {
         optElement.classList.add('correct');
         score++;
         
-        // 如果是在【错题本】模式下做对了，将其从错题本中移除
         if (currentSubject === 'wrong') {
             wrongGlobalIds = wrongGlobalIds.filter(id => id !== q.id);
             localStorage.setItem('sgcc_wrong_ids', JSON.stringify(wrongGlobalIds));
@@ -318,13 +372,11 @@ function checkAnswer(selectedKey, optElement) {
         optElement.classList.add('wrong');
         wrongInSession++;
         
-        // 做错题目自动加入全局错题本（如果原本不在里面）
         if (!wrongGlobalIds.includes(q.id)) {
             wrongGlobalIds.push(q.id);
             localStorage.setItem('sgcc_wrong_ids', JSON.stringify(wrongGlobalIds));
         }
 
-        // 高亮正确答案
         items.forEach(item => {
             if (item.innerText.startsWith(q.answer + '.')) {
                 item.classList.add('correct');
@@ -332,7 +384,6 @@ function checkAnswer(selectedKey, optElement) {
         });
     }
 
-    // 展现解析
     document.getElementById('anaTitle').innerText = `正确答案：${q.answer}`;
     document.getElementById('anaText').innerText = q.analysis;
     document.getElementById('analysisBox').style.display = 'block';
@@ -340,11 +391,9 @@ function checkAnswer(selectedKey, optElement) {
     document.getElementById('nextBtn').innerText = (currentIndex === currentSessionQuestions.length - 1) ? "查看测验结果" : "下一题";
     document.getElementById('nextBtn').style.display = 'block';
     
-    // 实时更新主面板的进度数字
     refreshOverallProgress();
 }
 
-// 下一题或进入结算
 function nextQuestion() {
     currentIndex++;
     if (currentIndex < currentSessionQuestions.length) {
@@ -367,10 +416,9 @@ function nextQuestion() {
     }
 }
 
-// 页面首次加载
 window.onload = function() {
     refreshOverallProgress();
-    selectSubject('all'); // 默认进入综合练兵
+    selectSubject('all');
 };
 </script>
 </body>
