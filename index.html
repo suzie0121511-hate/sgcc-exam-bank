@@ -98,18 +98,24 @@ const subjectIcons = {
 
 async function loadDatabase() {
     try {
-        const response = await fetch('./questions.json?t=' + new Date().getTime());
-        rawQuestions = await response.json();
+        // 同时读取第一卷和第二卷
+        const res1 = await fetch('./questions.json?t=' + new Date().getTime());
+        const data1 = await res1.json();
+        
+        let data2 = [];
+        try {
+            const res2 = await fetch('./questions_vol2.json?t=' + new Date().getTime());
+            data2 = await res2.json();
+        } catch(e) { console.log("第二卷暂无数据或读取失败"); }
+        rawQuestions = data1.concat(data2);
         
         renderSubjectPanel();
-        
         document.getElementById('loadingTips').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
-        
         refreshOverallProgress();
         selectSubject('all');
     } catch (error) {
-        document.getElementById('loadingTips').innerText = '❌ 题库加载失败，请检查 questions.json 文件。';
+        document.getElementById('loadingTips').innerText = '❌ 题库加载失败，请检查配置文件。';
         console.error(error);
     }
 }
